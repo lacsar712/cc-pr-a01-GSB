@@ -21,20 +21,32 @@ def connect():
 
 
 def ensure():
+    statements = [
+        """CREATE TABLE IF NOT EXISTS jobs (
+            id serial PRIMARY KEY,
+            sheet text NOT NULL,
+            cyan_mm double precision NOT NULL,
+            magenta_mm double precision NOT NULL,
+            machine_name text NOT NULL DEFAULT '',
+            status text NOT NULL,
+            verdict text NOT NULL DEFAULT '',
+            reason text NOT NULL DEFAULT '',
+            created_by text NOT NULL,
+            created_at timestamptz NOT NULL
+        )""",
+        """CREATE TABLE IF NOT EXISTS machines (
+            id serial PRIMARY KEY,
+            name text NOT NULL UNIQUE,
+            usable boolean NOT NULL DEFAULT TRUE,
+            created_by text NOT NULL,
+            created_at timestamptz NOT NULL,
+            updated_at timestamptz NOT NULL
+        )""",
+        "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS machine_name text NOT NULL DEFAULT ''",
+    ]
     with connect() as conn:
-        conn.execute(
-            """CREATE TABLE IF NOT EXISTS jobs (
-                id serial PRIMARY KEY,
-                sheet text NOT NULL,
-                cyan_mm double precision NOT NULL,
-                magenta_mm double precision NOT NULL,
-                status text NOT NULL,
-                verdict text NOT NULL DEFAULT '',
-                reason text NOT NULL DEFAULT '',
-                created_by text NOT NULL,
-                created_at timestamptz NOT NULL
-            )"""
-        )
+        for statement in statements:
+            conn.execute(statement)
         conn.commit()
 
 
