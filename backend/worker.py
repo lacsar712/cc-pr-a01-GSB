@@ -23,6 +23,16 @@ def connect():
 def ensure():
     with connect() as conn:
         conn.execute(
+            """CREATE TABLE IF NOT EXISTS machines (
+                id serial PRIMARY KEY,
+                name text NOT NULL UNIQUE,
+                active boolean NOT NULL DEFAULT true,
+                created_by text NOT NULL,
+                created_at timestamptz NOT NULL,
+                deactivated_at timestamptz
+            )"""
+        )
+        conn.execute(
             """CREATE TABLE IF NOT EXISTS jobs (
                 id serial PRIMARY KEY,
                 sheet text NOT NULL,
@@ -31,9 +41,13 @@ def ensure():
                 status text NOT NULL,
                 verdict text NOT NULL DEFAULT '',
                 reason text NOT NULL DEFAULT '',
+                machine_name text NOT NULL DEFAULT '',
                 created_by text NOT NULL,
                 created_at timestamptz NOT NULL
             )"""
+        )
+        conn.execute(
+            "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS machine_name text NOT NULL DEFAULT ''"
         )
         conn.commit()
 
